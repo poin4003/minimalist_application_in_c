@@ -1,0 +1,25 @@
+FROM archlinux:latest as builder
+
+RUN pacman -Syu --noconfirm && pacman -S --noconfirm \
+    base-devel \
+    gcc \
+    make \
+    curl \
+    libbsd \
+    ncurses \
+    && pacman -Scc --noconfirm
+
+WORKDIR /app
+COPY . /app
+RUN gcc -o myapp snake_game.c -lncurses
+
+FROM archlinux:latest
+
+RUN pacman -Syu --noconfirm && pacman -S --noconfirm \
+    libbsd \
+    && pacman -Scc --noconfirm
+
+WORKDIR /app
+COPY --from=builder /app/myapp /app/myapp
+
+CMD ["./myapp"]
